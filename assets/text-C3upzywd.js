@@ -1,0 +1,1 @@
+import{d as c,u as l,c as p,o as u,a as s,b as i,t as a,e as o}from"./index-DqM9giql.js";const d={class:"h-[100vh] grid place-items-center"},x=c({__name:"text",setup(m){const e=l(),n=e.meta.title,r=e.path;return(_,t)=>(u(),p("div",d,[s(a(o(n))+" ",1),t[0]||(t[0]=i("br",null,null,-1)),s(" "+a(o(r)),1)]))}});export{x as default};
