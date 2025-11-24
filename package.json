@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "deploy": "vue-tsc -b && vite build && gh-pages -d dist",
+    "build": "vue-tsc --noEmit && vite build",
+    "deploy": "vue-tsc --noEmit && vite build && gh-pages -d dist",
     "type-check": "vue-tsc --noEmit",
     "preview": "vite preview"
   },
