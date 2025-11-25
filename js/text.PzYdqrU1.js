@@ -1,1 +1,0 @@
-import{d as c,g as l,c as p,b as u,q as s,h as i,t as a,j as o}from"./index.sJ2iIMDg.js";const d={class:"h-full grid place-items-center"},x=c({__name:"text",setup(m){const t=l(),n=t.meta.title,r=t.path;return(_,e)=>(u(),p("div",d,[s(a(o(n))+" ",1),e[0]||(e[0]=i("br",null,null,-1)),s(" "+a(o(r)),1)]))}});export{x as default};
