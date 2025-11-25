@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[100vh] grid place-items-center">
+  <div class="h-full grid place-items-center">
     {{ text }}
     <br />
     {{ path }}
