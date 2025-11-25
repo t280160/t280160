@@ -15,7 +15,7 @@
           v-if="str"
           :text="str"
           :delay="200"
-          class-name="text-sm sm:text-base lg:text-2xl font-semibold text-white mx-auto"
+          class-name="text-sm sm:text-base lg:text-5xl font-semibold text-white mx-auto"
           animate-by="letters"
           direction="top"
           :threshold="0.1"

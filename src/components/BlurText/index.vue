@@ -22,7 +22,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, useTemplateRef } from "vue";
 import { Motion } from "motion-v";
-
 type AnimateBy = "words" | "letters";
 type Direction = "top" | "bottom";
 type AnimationSnapshot = Record<string, string | number>;

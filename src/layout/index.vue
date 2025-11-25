@@ -1,5 +1,6 @@
 <template>
   <div class="h-full w-full">
+    <motion.div id="scroll-indicator" :style="scrollIndicator" />
     <!-- 浮动导航栏 (初始状态) -->
     <div
       :class="[
@@ -9,7 +10,7 @@
     >
       <div
         :class="[
-          'flex items-center h-16 px-6  bg-[hsla(0,0%,100%,0.05)] backdrop-filter backdrop-blur-[10px] border border-[rgba(255,255,255,0.6)] w-[90%] md:w-[60%] transition-all duration-500',
+          'flex items-center h-16 px-6  bg-[hsla(0,0%,100%,0.05)] backdrop-filter backdrop-blur-[10px] border border-[rgba(255,255,255,0.6)] w-[90%] md:w-[60%] transition-all duration-500 relative',
           isScrolled ? 'rounded-[16px]' : 'rounded-[50px]',
         ]"
       >
@@ -48,11 +49,21 @@
 
 <script setup lang="ts">
 import Logo from "@/components/logo/index.vue";
-
+import { motion, useScroll } from "motion-v";
 const contentRef = ref<HTMLElement | null>(null);
 const isScrolled = ref(false);
 const scrollThreshold = 20;
-
+const { scrollYProgress } = useScroll();
+const scrollIndicator = {
+  scaleX: scrollYProgress,
+  position: "fixed",
+  top: "-1px",
+  left: 0,
+  right: 0,
+  height: "4px",
+  originX: 0,
+  backgroundColor: "#ff0088",
+};
 const navItems = [
   { label: "主页", path: "/dashboard" },
   { label: "关于", path: "/about" },
