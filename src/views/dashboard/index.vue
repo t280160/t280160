@@ -8,6 +8,21 @@
         :speed="0.5"
         :intensity="1.5"
       />
+      <div
+        class="text-center whitespace-normal break-words px-4 sm:px-0 h-full flex items-center justify-center"
+      >
+        <BlurText
+          v-if="str"
+          :text="str"
+          :delay="200"
+          class-name="text-sm sm:text-base lg:text-2xl font-semibold text-white mx-auto"
+          animate-by="letters"
+          direction="top"
+          :threshold="0.1"
+          root-margin="0px"
+          :step-duration="0.35"
+        />
+      </div>
     </div>
     <!-- 添加额外内容以支持滚动 -->
     <div class="min-h-screen bg-black flex items-center justify-center">
@@ -16,8 +31,29 @@
         <p class="text-lg text-gray-400">向下滚动查看导航栏变化</p>
       </div>
     </div>
+    <!-- 底部 -->
+    <div class="w-[90%] md:w-[60%] mx-auto grid place-items-center min-h-16">
+      <TrueFocus
+        sentence="VueBits Vue Vite TypeScript Tailwindcss Three Gasp Motion-v Ogl"
+        :manualMode="false"
+        :blurAmount="2"
+        borderColor="#27FF64"
+        :animationDuration="0.5"
+        :pauseBetweenAnimations="1"
+      />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import Aurora from "@/components/Aurora/index.vue";
+import TrueFocus from "@/components/TrueFocus/index.vue";
+import BlurText from "@/components/BlurText/index.vue";
+import { getDashBoardStr } from "@/api/dailyQuote";
+
+const str = ref("");
+onMounted(() => {
+  getDashBoardStr().then((res) => {
+    str.value = res.data.content;
+  });
+});
 </script>
