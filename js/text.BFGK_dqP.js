@@ -1,1 +1,0 @@
-import{d as l,l as c,c as i,q as s,g as p,t as a,i as o,b as u}from"./index.DOVOpBWO.js";const d={class:"h-full grid place-items-center"},x=l({__name:"text",setup(m){const t=c(),n=t.meta.title,r=t.path;return(_,e)=>(u(),i("div",d,[s(a(o(n))+" ",1),e[0]||(e[0]=p("br",null,null,-1)),s(" "+a(o(r)),1)]))}});export{x as default};
