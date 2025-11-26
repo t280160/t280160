@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full bg-black">
+  <div class="w-full bg-black pb-10">
     <div class="relative w-full h-screen overflow-hidden">
       <Aurora
         :color-stops="['#7cff67', '#171D22', '#7cff67']"
@@ -25,11 +25,8 @@
       </div>
     </div>
     <!-- 添加额外内容以支持滚动 -->
-    <div class="min-h-screen bg-black flex items-center justify-center">
-      <div class="text-white text-center">
-        <h2 class="text-4xl font-bold mb-4">第二页内容</h2>
-        <p class="text-lg text-gray-400">向下滚动查看导航栏变化</p>
-      </div>
+    <div class="min-h-screen bg-black flex justify-center">
+      <!-- <Bagua /> -->
     </div>
     <!-- 底部 -->
     <div class="w-[90%] md:w-[60%] mx-auto grid place-items-center min-h-16">
@@ -48,6 +45,7 @@
 import Aurora from "@/components/Aurora/index.vue";
 import TrueFocus from "@/components/TrueFocus/index.vue";
 import BlurText from "@/components/BlurText/index.vue";
+import Bagua from "@/components/bagua/index.vue";
 import { getDashBoardStr } from "@/api/dailyQuote";
 
 const str = ref("");
