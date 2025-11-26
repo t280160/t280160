@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef" class="relative w-full h-screen bg-transparent">
+  <div id="winCanvas" ref="containerRef" class="relative w-full h-screen bg-transparent">
     <!-- 加载提示 -->
     <div
       v-if="isLoading"
@@ -64,7 +64,6 @@ let controls: OrbitControls | null = null;
 let objects: THREE.Mesh[] = [];
 let labelObjects: THREE.Sprite[] = [];
 let animationId: number | null = null;
-let mouse: THREE.Vector2 | null = null;
 
 // --- 数据定义 ---
 const baguaData: BaguaData[] = [
@@ -311,8 +310,6 @@ function loadTheme(themeName: ThemeName): void {
   const lights = theme.lights();
   lights.forEach((l) => scene!.add(l));
 
-  // 删除地面/圆盘 - 不再创建地面
-
   // 创建九宫格方块
   const group = new THREE.Group();
   scene.add(group);
@@ -433,40 +430,17 @@ function init(rotation: number): void {
   renderer.setSize(width, height);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.domElement.style.touchAction = "none"; // 关键：让触摸事件生效
   container.appendChild(renderer.domElement);
 
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enableZoom = false;
-  controls.enablePan = false;
-  controls.maxPolarAngle = Math.PI / 2 - 0.1;
-
-  mouse = new THREE.Vector2();
-
-  const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-    if (!mouse || !renderer) return;
-    const canvas = renderer.domElement;
-    const rect = canvas.getBoundingClientRect();
-    let clientX = 0;
-    let clientY = 0;
-    if (e instanceof MouseEvent) {
-      // 👉 PC 事件
-      clientX = e.clientX;
-      clientY = e.clientY;
-    } else {
-      // 👉 手机触屏事件
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-  };
-  window.addEventListener("mousemove", handleMouseMove);
-  window.addEventListener("touchmove", handleMouseMove, { passive: false });
-  // 保存事件处理器以便清理
-  (window as any).__baguaMouseMoveHandler = handleMouseMove;
-  // 创建一个四方形盒子并添加到场景中
-  // BoxGeometry(width, height, depth)
+  // controls.rotateSpeed = 0.5;
+  // controls.enableDamping = true;
+  // controls.enableZoom = false;
+  // controls.enablePan = false;
+  // // 👉 关键：手机触摸映射（否则不能旋转）
+  // controls.touches.ONE = THREE.TOUCH.ROTATE;
+  // controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
 
   loadTheme("jade");
   const box = new THREE.Box3().setFromObject(scene);
@@ -496,11 +470,11 @@ function init(rotation: number): void {
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
   };
-  window.addEventListener("resize", handleResize);
+  // window.addEventListener("resize", handleResize);
 
   function animate(): void {
     animationId = requestAnimationFrame(animate);
-    if (!scene || !camera || !renderer || !mouse) return;
+    if (!scene || !camera || !renderer) return;
 
     const time = performance.now() * 0.001;
 
@@ -530,13 +504,6 @@ function cleanup(): void {
     animationId = null;
   }
 
-  // 移除事件监听器
-  if ((window as any).__baguaMouseMoveHandler) {
-    window.removeEventListener("mousemove", (window as any).__baguaMouseMoveHandler);
-    window.removeEventListener("touchmove", (window as any).__baguaMouseMoveHandler);
-    delete (window as any).__baguaMouseMoveHandler;
-  }
-
   if (renderer) {
     const container = containerRef.value;
     if (container && renderer.domElement.parentNode === container) {
@@ -564,7 +531,6 @@ function cleanup(): void {
   controls = null;
   objects = [];
   labelObjects = [];
-  mouse = null;
 }
 function init2(event: DeviceOrientationEvent) {
   const alpha = event.alpha ?? 0; // 设备旋转角度
