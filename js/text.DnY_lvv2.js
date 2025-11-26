@@ -1,1 +1,0 @@
-import{d as c,i as l,c as i,b as p,s,k as u,t as a,g as o}from"./index.l9tnet3B.js";const d={class:"h-full grid place-items-center"},x=c({__name:"text",setup(m){const t=l(),n=t.meta.title,r=t.path;return(_,e)=>(p(),i("div",d,[s(a(o(n))+" ",1),e[0]||(e[0]=u("br",null,null,-1)),s(" "+a(o(r)),1)]))}});export{x as default};
