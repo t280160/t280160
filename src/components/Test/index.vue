@@ -23,7 +23,7 @@ function init(): void {
   if (!container) return;
 
   const { width, height } = containerRef.value.getBoundingClientRect();
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(width, height);
   container.appendChild(renderer.domElement);

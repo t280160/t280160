@@ -4,7 +4,7 @@
     <!-- 浮动导航栏 (初始状态) -->
     <div
       :class="[
-        'grid place-items-center bg-transparent fixed z-10 w-full left-0 transition-all duration-500',
+        'grid place-items-center bg-transparent fixed  z-50 w-full left-0 transition-all duration-500',
         isScrolled ? 'top-0 translate-y-0 py-2' : 'top-[2em]',
       ]"
     >

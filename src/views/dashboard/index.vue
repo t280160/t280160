@@ -26,7 +26,7 @@
     </div>
     <!-- 添加额外内容以支持滚动 -->
     <div class="min-h-screen bg-black flex justify-center">
-      <Test />
+      <!-- <Test /> -->
     </div>
     <!-- 底部 -->
     <div class="w-[90%] md:w-[60%] mx-auto grid place-items-center min-h-16">

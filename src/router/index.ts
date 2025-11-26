@@ -19,7 +19,7 @@ export const baseRoutes: RouteRecordRaw[] = [
       {
         path: "about",
         name: "About",
-        component: () => import("@/views/text.vue"),
+        component: () => import("@/views/about/index.vue"),
       },
     ],
   },
