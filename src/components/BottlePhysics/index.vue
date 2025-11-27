@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="w-full h-120" />
+  <div ref="container" class="w-full h-120" @click="launchBody" />
 </template>
 
 <script setup lang="ts">
@@ -41,14 +41,11 @@ function init() {
     }
   });
 }
-watch(
-  () => moveV2.value.x,
-  () => {
-    if (initCannon.body) {
-      initCannon.launchBody(initCannon.body);
-    }
+function launchBody() {
+  if (initCannon.body) {
+    initCannon.launchBody(initCannon.body);
   }
-);
+}
 
 onMounted(() => {
   nextTick(() => {

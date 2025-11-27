@@ -22,13 +22,28 @@ export class InitThree {
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       this.renderer.setSize(width, height);
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和阴影
       container.appendChild(this.renderer.domElement);
 
-      const light = new THREE.DirectionalLight(0xffffff, 1);
-      light.position.set(3, 5, 2);
-      this.scene.add(light);
-      this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 10, 5);
+      directionalLight.castShadow = true; // 光源产生阴影
+      // 配置阴影的范围和质量（可选）
+      directionalLight.shadow.mapSize.width = 1024;
+      directionalLight.shadow.mapSize.height = 1024;
+      directionalLight.shadow.camera.near = 1;
+      directionalLight.shadow.camera.far = 20;
+      directionalLight.shadow.camera.left = -10;
+      directionalLight.shadow.camera.right = 10;
+      directionalLight.shadow.camera.top = 10;
+      directionalLight.shadow.camera.bottom = -10;
+      this.scene.add(directionalLight);
+      const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 2, 0xff0000);
+      this.scene.add(dirLightHelper);
+      // 可选：添加环境光让阴影不太死黑
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+      this.scene.add(ambientLight);
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       this.controls.enableDamping = true; // 阻尼效果，动画循环里需要 update
       this.controls.dampingFactor = 0.05;
@@ -41,18 +56,26 @@ export class InitThree {
       this.controls.update();
 
       const geometry = new THREE.BoxGeometry(20, 1, 20);
-      const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      const material = new THREE.ShadowMaterial({ opacity: 1 });
       const cube = new THREE.Mesh(geometry, material);
       cube.position.set(0, -0.25, 0);
+      cube.receiveShadow = true;
       // cube.rotation.z = -0.3;
       this.scene.add(cube);
+
       this.resizeCamera();
     }
   }
   addBox() {
     const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 20);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xb5a642, // 材质颜色
+      metalness: 0.7, // 金属感，0-1
+      roughness: 0.4, // 粗糙度，0-1
+    });
     const cube = new THREE.Mesh(geometry, material);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     cube.position.set(0, 1, 0);
     return cube;
   }
