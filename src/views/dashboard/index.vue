@@ -27,6 +27,7 @@
     <!-- 添加额外内容以支持滚动 -->
     <div class="min-h-screen bg-black flex justify-center">
       <!-- <Test /> -->
+      <BottlePhysics />
     </div>
     <!-- 底部 -->
     <div class="w-[90%] md:w-[60%] mx-auto grid place-items-center min-h-16">
@@ -45,8 +46,7 @@
 import Aurora from "@/components/Aurora/index.vue";
 import TrueFocus from "@/components/TrueFocus/index.vue";
 import BlurText from "@/components/BlurText/index.vue";
-import Bagua from "@/components/bagua/index.vue";
-import Test from "@/components/Test/index.vue";
+import BottlePhysics from "@/components/BottlePhysics/index.vue";
 import { getDashBoardStr } from "@/api/dailyQuote";
 
 const str = ref("");

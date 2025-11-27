@@ -12,8 +12,6 @@ let initThree = new InitThree();
 let initCannon = new InitCannon();
 let animate = new Animate();
 let cube: THREE.Mesh | null = null;
-let lastX = 0;
-let lastY = 0;
 
 function init() {
   if (!container.value) return;
@@ -39,6 +37,7 @@ function init() {
         initCannon.body.quaternion.z,
         initCannon.body.quaternion.w
       );
+      // initThree.camera?.lookAt(cube.position);
     }
   });
 }

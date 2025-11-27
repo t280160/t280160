@@ -32,23 +32,25 @@ export class InitThree {
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       this.controls.enableDamping = true; // 阻尼效果，动画循环里需要 update
       this.controls.dampingFactor = 0.05;
-      this.controls.enablePan = true; // 允许平移
-      this.controls.enableZoom = true; // 允许缩放
+      this.controls.enableRotate = false;
+      this.controls.enablePan = false; // 允许平移
+      this.controls.enableZoom = false; // 允许缩放
       // this.controls.maxDistance = 10; // 最大缩放距离
       // this.controls.minDistance = 1.5; // 最小缩放距离
       this.controls.target.set(0, 1, 0); // 控制中心
       this.controls.update();
 
       const geometry = new THREE.BoxGeometry(20, 1, 20);
-      const material = new THREE.MeshBasicMaterial({ color: 0x00000 });
+      const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
       const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(0, 0.5, 0);
+      cube.position.set(0, -0.25, 0);
       // cube.rotation.z = -0.3;
       this.scene.add(cube);
+      this.resizeCamera();
     }
   }
   addBox() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 20);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 1, 0);
@@ -62,6 +64,28 @@ export class InitThree {
       this.controls.update();
     }
   }
+  /* 根据屏幕尺寸调整相机 */
+  resizeCamera() {
+    if (this.scene && this.camera) {
+      const box = new THREE.Box3().setFromObject(this.scene);
+      const size = box.getSize(new THREE.Vector3()).length();
+      const center = box.getCenter(new THREE.Vector3());
+
+      // 屏幕宽度系数，电脑屏幕让模型更大
+      let factor = 1;
+      if (window.innerWidth >= 1200) {
+        // 电脑屏幕阈值，可调整
+        factor = 0.7; // 调小距离，让模型显得更大
+      } else if (window.innerWidth <= 768) {
+        // 手机屏幕
+        factor = 2; // 适当拉远
+      }
+      this.camera.position.copy(center);
+      this.camera.position.z += size * factor; // 拉远距离，保证完整可见
+      this.camera.position.y = 16;
+      this.camera.lookAt(center);
+    }
+  }
   dispose() {
     if (this.renderer) {
       this.renderer.dispose();
@@ -72,7 +96,7 @@ export class InitThree {
 export class InitCannon {
   world: CANNON.World;
   body: CANNON.Body | null;
-  cubeShape: CANNON.Box | null;
+  cubeShape: CANNON.Cylinder | null;
   clock: THREE.Clock;
   groundMaterial: CANNON.Material;
   bouncyMaterial: CANNON.Material;
@@ -140,13 +164,13 @@ export class InitCannon {
   initMaterial() {
     this.world.addContactMaterial(
       new CANNON.ContactMaterial(this.groundMaterial, this.bouncyMaterial, {
-        friction: 0.4,
+        friction: 0.3,
         restitution: 0.9,
       })
     );
   }
   initCube() {
-    this.cubeShape = new CANNON.Box(new CANNON.Vec3(1, 1, 1)); // 立方体形状
+    this.cubeShape = new CANNON.Cylinder(1, 1, 0.1, 100); // 立方体形状
     this.body = new CANNON.Body({
       mass: 1, // 质量
       position: new CANNON.Vec3(0, 3, 0), // 初始位置
