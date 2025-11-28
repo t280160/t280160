@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full bg-black pb-10">
+  <div class="w-full bg-[#101010] pb-10">
     <div class="relative w-full h-screen overflow-hidden">
       <Aurora
         :color-stops="['#7cff67', '#171D22', '#7cff67']"
@@ -25,7 +25,7 @@
       </div>
     </div>
     <!-- 添加额外内容以支持滚动 -->
-    <div class="min-h-screen bg-black flex justify-center">
+    <div class="min-h-screen bg-[#101010] flex justify-center">
       <!-- <Test /> -->
       <BottlePhysics />
     </div>

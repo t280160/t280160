@@ -26,45 +26,66 @@ export class InitThree {
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和阴影
       container.appendChild(this.renderer.domElement);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(5, 10, 5);
-      directionalLight.castShadow = true; // 光源产生阴影
-      // 配置阴影的范围和质量（可选）
-      directionalLight.shadow.mapSize.width = 1024;
-      directionalLight.shadow.mapSize.height = 1024;
-      directionalLight.shadow.camera.near = 1;
-      directionalLight.shadow.camera.far = 20;
-      directionalLight.shadow.camera.left = -10;
-      directionalLight.shadow.camera.right = 10;
-      directionalLight.shadow.camera.top = 10;
-      directionalLight.shadow.camera.bottom = -10;
-      this.scene.add(directionalLight);
-      const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 2, 0xff0000);
-      this.scene.add(dirLightHelper);
-      // 可选：添加环境光让阴影不太死黑
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-      this.scene.add(ambientLight);
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true; // 阻尼效果，动画循环里需要 update
-      this.controls.dampingFactor = 0.05;
-      this.controls.enableRotate = false;
-      this.controls.enablePan = false; // 允许平移
-      this.controls.enableZoom = false; // 允许缩放
-      // this.controls.maxDistance = 10; // 最大缩放距离
-      // this.controls.minDistance = 1.5; // 最小缩放距离
-      this.controls.target.set(0, 1, 0); // 控制中心
-      this.controls.update();
-
-      const geometry = new THREE.BoxGeometry(20, 1, 20);
-      const material = new THREE.ShadowMaterial({ opacity: 1 });
-      const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(0, -0.25, 0);
-      cube.receiveShadow = true;
-      // cube.rotation.z = -0.3;
-      this.scene.add(cube);
-
+      this.addLights();
+      this.addControls();
+      this.addPlane();
       this.resizeCamera();
     }
+  }
+  addPlane() {
+    if (!this.scene) return;
+    const groundGeometry = new THREE.PlaneGeometry(50, 50);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+      color: 0x101010, // 和背景颜色相近
+      side: THREE.DoubleSide,
+    });
+    const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+    groundMesh.rotation.x = -Math.PI / 2; // 平铺 XZ 平面
+    groundMesh.position.y = -5.5; // 放在盒子底部
+    groundMesh.receiveShadow = true; // 接收阴影
+    this.scene.add(groundMesh);
+  }
+  addControls() {
+    if (!this.camera || !this.renderer) return;
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true; // 阻尼效果，动画循环里需要 update
+    this.controls.dampingFactor = 0.05;
+    this.controls.enableRotate = false;
+    this.controls.enablePan = false; // 允许平移
+    this.controls.enableZoom = false; // 允许缩放
+    // this.controls.maxDistance = 10; // 最大缩放距离
+    // this.controls.minDistance = 1.5; // 最小缩放距离
+    this.controls.target.set(0, 1, 0); // 控制中心
+    this.controls.update();
+  }
+  addLights() {
+    if (!this.scene) return;
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    light.castShadow = true; // 开启投影
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    this.scene.add(light);
+    // 可选：添加环境光让阴影不太死黑
+    // const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    // this.scene.add(ambientLight);
+
+    // 创建聚光灯
+    // const spotLight = new THREE.SpotLight(0xffaa00, 2); // 黄色光
+    // spotLight.position.set(5, 30, 5); // 高于盒子
+    // spotLight.angle = Math.PI / 4;
+    // spotLight.penumbra = 0.5;
+    // spotLight.decay = 2;
+    // spotLight.distance = 30;
+    // spotLight.castShadow = true;
+
+    // // 确保光照朝地板方向
+    // spotLight.target.position.set(0, -5.5, 0);
+    // this.scene.add(spotLight);
+    // this.scene.add(spotLight.target);
+
+    // const spotHelper = new THREE.SpotLightHelper(spotLight);
+    // this.scene.add(spotHelper);
   }
   addBox() {
     const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 20);
@@ -98,7 +119,7 @@ export class InitThree {
       let factor = 1;
       if (window.innerWidth >= 1200) {
         // 电脑屏幕阈值，可调整
-        factor = 0.7; // 调小距离，让模型显得更大
+        factor = 0.3; // 调小距离，让模型显得更大
       } else if (window.innerWidth <= 768) {
         // 手机屏幕
         factor = 2; // 适当拉远
@@ -133,56 +154,24 @@ export class InitCannon {
     this.initWorld();
     this.initMaterial();
   }
+  createWall(position: CANNON.Vec3, halfExtents: CANNON.Vec3) {
+    const shape = new CANNON.Box(halfExtents);
+    const body = new CANNON.Body({ mass: 0, shape });
+    body.position.copy(position);
+    body.material = this.groundMaterial;
+    this.world.addBody(body);
+  }
   initWorld() {
     this.world.gravity.set(0, -9.82, 0);
-    // 创建地面（物理）
-    // const planeShape = new CANNON.Plane(); // 地面形状
-    const planeBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(10, 0.5, 10)),
-      position: new CANNON.Vec3(0, 0, 0),
-      material: this.groundMaterial,
-    });
-    const topBody = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(10, 0.5, 10)),
-      position: new CANNON.Vec3(0, 5, 0),
-      material: this.groundMaterial,
-    });
-    /* 左 */
-    const wallLeft = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(0.5, 5, 10)), // 厚0.5, 高5, 深20
-      position: new CANNON.Vec3(-10.5, 5, 0), // x偏移到左边
-      material: this.groundMaterial,
-    });
-    // 右墙
-    const wallRight = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(0.5, 5, 10)),
-      position: new CANNON.Vec3(10.5, 5, 0),
-      material: this.groundMaterial,
-    });
-    // 前墙
-    const wallFront = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(10, 5, 0.5)),
-      position: new CANNON.Vec3(0, 5, 10.5),
-      material: this.groundMaterial,
-    });
-    // 后墙
-    const wallBack = new CANNON.Body({
-      type: CANNON.Body.STATIC,
-      shape: new CANNON.Box(new CANNON.Vec3(10, 5, 0.5)),
-      position: new CANNON.Vec3(0, 5, -10.5),
-      material: this.groundMaterial,
-    });
-    this.world.addBody(wallLeft);
-    this.world.addBody(topBody);
-    this.world.addBody(planeBody);
-    this.world.addBody(wallRight);
-    this.world.addBody(wallFront);
-    this.world.addBody(wallBack);
+    const size = 5; // 盒子半边长
+    const ho = 0.5;
+    // 上下左右前后墙
+    this.createWall(new CANNON.Vec3(0, size, 0), new CANNON.Vec3(size, ho, size)); // 上
+    this.createWall(new CANNON.Vec3(0, -size, 0), new CANNON.Vec3(size, ho, size)); // 下
+    this.createWall(new CANNON.Vec3(size, 0, 0), new CANNON.Vec3(ho, size, size)); // 右
+    this.createWall(new CANNON.Vec3(-size, 0, 0), new CANNON.Vec3(ho, size, size)); // 左
+    this.createWall(new CANNON.Vec3(0, 0, size), new CANNON.Vec3(size, size, ho)); // 前
+    this.createWall(new CANNON.Vec3(0, 0, -size), new CANNON.Vec3(size, size, ho)); // 后
   }
   initMaterial() {
     this.world.addContactMaterial(
@@ -203,28 +192,13 @@ export class InitCannon {
       this.body?.addShape(this.cubeShape);
       this.world.addBody(this.body);
     }
-    // this.body.type = CANNON.Body.KINEMATIC; // 不受重力影响
   }
   launchBody(body: CANNON.Body) {
-    // 力大小
-    const forceMagnitude = 1 + Math.random() * 10;
+    const fx = (Math.random() - 0.5) * 20;
+    const fy = (Math.random() - 0.5) * 20;
+    const fz = (Math.random() - 0.5) * 20;
 
-    // 随机方向
-    const fx = (Math.random() - 0.5) * 2; // -1~1
-    const fy = (Math.random() - 0.5) * 4; // 0~1，主要向上
-    const fz = (Math.random() - 0.5) * 2;
-
-    const force = new CANNON.Vec3(fx, fy, fz).scale(forceMagnitude);
-
-    // 随机施加点，相对于物体中心
-    const offsetX = (Math.random() - 0.5) * 1; // -0.5~0.5
-    const offsetY = (Math.random() - 0.5) * 1;
-    const offsetZ = (Math.random() - 0.5) * 1;
-    const point = body.position.vadd(new CANNON.Vec3(offsetX, offsetY, offsetZ));
-    console.log(force, point);
-
-    // 施加冲击力
-    body.applyImpulse(force, point);
+    body.applyImpulse(new CANNON.Vec3(fx, fy, fz), body.position);
   }
   animate() {
     this.world.step(1 / 60, this.clock.getDelta());
