@@ -29,7 +29,7 @@ export class InitThree {
       this.addLights();
       this.addControls();
       this.addPlane();
-      this.resizeCamera();
+      // this.resizeCamera();
     }
   }
   addPlane() {
@@ -38,6 +38,8 @@ export class InitThree {
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x101010, // 和背景颜色相近
       side: THREE.DoubleSide,
+      // roughness: 0.6, // 较暗，但能有一点光泽
+      // metalness: 0.1, // 少量金属感，让光线有反射
     });
     const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
     groundMesh.rotation.x = -Math.PI / 2; // 平铺 XZ 平面
@@ -60,32 +62,23 @@ export class InitThree {
   }
   addLights() {
     if (!this.scene) return;
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 20, 10);
-    light.castShadow = true; // 开启投影
-    light.shadow.mapSize.width = 1024;
-    light.shadow.mapSize.height = 1024;
-    this.scene.add(light);
-    // 可选：添加环境光让阴影不太死黑
-    // const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-    // this.scene.add(ambientLight);
+    const spotLight = new THREE.SpotLight(0xffffff, 3);
+    spotLight.name = "spotLight";
+    spotLight.position.set(2.5, 10, 2.5);
+    spotLight.angle = Math.PI / 4;
+    spotLight.penumbra = 1;
+    spotLight.decay = 2;
+    spotLight.distance = 0;
 
-    // 创建聚光灯
-    // const spotLight = new THREE.SpotLight(0xffaa00, 2); // 黄色光
-    // spotLight.position.set(5, 30, 5); // 高于盒子
-    // spotLight.angle = Math.PI / 4;
-    // spotLight.penumbra = 0.5;
-    // spotLight.decay = 2;
-    // spotLight.distance = 30;
-    // spotLight.castShadow = true;
+    spotLight.castShadow = true;
 
-    // // 确保光照朝地板方向
-    // spotLight.target.position.set(0, -5.5, 0);
-    // this.scene.add(spotLight);
-    // this.scene.add(spotLight.target);
+    this.scene.add(spotLight);
 
-    // const spotHelper = new THREE.SpotLightHelper(spotLight);
-    // this.scene.add(spotHelper);
+    // const helper = new THREE.SpotLightHelper(spotLight);
+    // this.scene.add(helper);
+
+    // const cameraHelper = new THREE.CameraHelper(spotLight.shadow.camera);
+    // this.scene.add(cameraHelper);
   }
   addBox() {
     const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 20);
