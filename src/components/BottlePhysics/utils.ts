@@ -6,19 +6,21 @@ export class InitThree {
   camera: THREE.PerspectiveCamera | null;
   renderer: THREE.WebGLRenderer | null;
   controls: OrbitControls | null;
+  spotLight: THREE.SpotLight | null;
   constructor() {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
     this.controls = null;
+    this.spotLight = null;
   }
 
   init(container: HTMLDivElement) {
     if (container) {
       const { width, height } = container.getBoundingClientRect();
       this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 200);
-      this.camera.position.set(0, 10, 12);
+      this.camera = new THREE.PerspectiveCamera(77, width / height, 0.1, 200);
+      this.camera.position.set(0, 15, 10);
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       this.renderer.setSize(width, height);
@@ -38,8 +40,8 @@ export class InitThree {
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x101010, // 和背景颜色相近
       side: THREE.DoubleSide,
-      // roughness: 0.6, // 较暗，但能有一点光泽
-      // metalness: 0.1, // 少量金属感，让光线有反射
+      roughness: 0.5, // 较暗，但能有一点光泽
+      metalness: 0.1, // 少量金属感，让光线有反射
     });
     const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
     groundMesh.rotation.x = -Math.PI / 2; // 平铺 XZ 平面
@@ -62,16 +64,16 @@ export class InitThree {
   }
   addLights() {
     if (!this.scene) return;
-    const spotLight = new THREE.SpotLight(0xffffff, 3);
+    const spotLight = new THREE.SpotLight(0xffffff, 5);
     spotLight.name = "spotLight";
-    spotLight.position.set(2.5, 10, 2.5);
-    spotLight.angle = Math.PI / 4;
+    spotLight.position.set(0, 20, 10);
+    spotLight.angle = Math.PI / 6;
     spotLight.penumbra = 1;
     spotLight.decay = 2;
     spotLight.distance = 0;
 
     spotLight.castShadow = true;
-
+    this.spotLight = spotLight;
     this.scene.add(spotLight);
 
     // const helper = new THREE.SpotLightHelper(spotLight);
@@ -80,7 +82,7 @@ export class InitThree {
     // const cameraHelper = new THREE.CameraHelper(spotLight.shadow.camera);
     // this.scene.add(cameraHelper);
   }
-  addBox() {
+  addBox(position: THREE.Vector3 = new THREE.Vector3(0, 1, 0)) {
     const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 20);
     const material = new THREE.MeshStandardMaterial({
       color: 0xb5a642, // 材质颜色
@@ -90,7 +92,7 @@ export class InitThree {
     const cube = new THREE.Mesh(geometry, material);
     cube.castShadow = true;
     cube.receiveShadow = true;
-    cube.position.set(0, 1, 0);
+    cube.position.set(position.x, position.y, position.z);
     return cube;
   }
   animate() {
@@ -100,6 +102,11 @@ export class InitThree {
     if (this.controls) {
       this.controls.update();
     }
+    /* if (this.spotLight) {
+      const time = performance.now() / 500;
+      this.spotLight.position.x = Math.cos(time) * 2.5;
+      this.spotLight.position.z = Math.sin(time) * 2.5;
+    } */
   }
   /* 根据屏幕尺寸调整相机 */
   resizeCamera() {
@@ -132,7 +139,7 @@ export class InitThree {
 }
 export class InitCannon {
   world: CANNON.World;
-  body: CANNON.Body | null;
+  bodyArr: { body: CANNON.Body; cube: THREE.Mesh }[] = [];
   cubeShape: CANNON.Cylinder | null;
   clock: THREE.Clock;
   groundMaterial: CANNON.Material;
@@ -140,7 +147,7 @@ export class InitCannon {
   constructor() {
     this.clock = new THREE.Clock();
     this.world = new CANNON.World();
-    this.body = null;
+    this.bodyArr = [];
     this.cubeShape = null;
     this.groundMaterial = new CANNON.Material("ground");
     this.bouncyMaterial = new CANNON.Material("bouncy");
@@ -174,27 +181,43 @@ export class InitCannon {
       })
     );
   }
-  initCube() {
+  initCube(cube: THREE.Mesh) {
+    const position = new CANNON.Vec3(cube.position.x, cube.position.y, cube.position.z);
     this.cubeShape = new CANNON.Cylinder(1, 1, 0.1, 100); // 立方体形状
-    this.body = new CANNON.Body({
+    const body = new CANNON.Body({
       mass: 1, // 质量
-      position: new CANNON.Vec3(0, 3, 0), // 初始位置
+      position: new CANNON.Vec3(position.x, 3, position.z), // 初始位置
       material: this.bouncyMaterial,
     });
-    if (this.body && this.cubeShape) {
-      this.body?.addShape(this.cubeShape);
-      this.world.addBody(this.body);
+    if (body && this.cubeShape) {
+      body?.addShape(this.cubeShape);
+      this.world.addBody(body);
+      this.bodyArr.push({
+        body,
+        cube,
+      });
     }
   }
-  launchBody(body: CANNON.Body) {
-    const fx = (Math.random() - 0.5) * 20;
-    const fy = (Math.random() - 0.5) * 20;
-    const fz = (Math.random() - 0.5) * 20;
+  launchBody() {
+    this.bodyArr.forEach(({ body }) => {
+      const fx = (Math.random() - 0.5) * 20;
+      const fy = (Math.random() - 0.5) * 20;
+      const fz = (Math.random() - 0.5) * 20;
 
-    body.applyImpulse(new CANNON.Vec3(fx, fy, fz), body.position);
+      body.applyImpulse(new CANNON.Vec3(fx, fy, fz), body.position);
+    });
   }
   animate() {
     this.world.step(1 / 60, this.clock.getDelta());
+    this.bodyArr.forEach(({ body, cube }) => {
+      cube.position.set(body.position.x, body.position.y, body.position.z);
+      cube.quaternion.set(
+        body.quaternion.x,
+        body.quaternion.y,
+        body.quaternion.z,
+        body.quaternion.w
+      );
+    });
   }
 }
 type Fun = () => void;
