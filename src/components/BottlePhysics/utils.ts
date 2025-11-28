@@ -29,9 +29,10 @@ export class InitThree {
       container.appendChild(this.renderer.domElement);
 
       this.addLights();
-      this.addControls();
+      // this.addControls();
       this.addPlane();
       // this.resizeCamera();
+      this.camera.lookAt(0, 1, 0);
     }
   }
   addPlane() {
